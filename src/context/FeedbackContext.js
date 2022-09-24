@@ -1,4 +1,6 @@
 import { createContext, useState, useEffect } from "react"
+import data from '../data/FeedbackData'
+import { v4 as uuidv4 } from 'uuid'
 
 const FeedbackContext = createContext()
 
@@ -16,36 +18,23 @@ export const FeedbackProvider = ({children}) => {
     fetchFeedback()
   }, [])
 
-  //Fetch feedback
-  const fetchFeedback = async () => {
-    const response = await fetch('http://localhost:5000/feedback?_sort=id&_order=desc')
-    const data = await response.json()
+  //set feedback list
+  const fetchFeedback = () => {
     setFeedback(data)
     setIsLoading(false)
   }
 
   //delete selected feedback Item
-  const deleteFeedback = async (id) => {
+  const deleteFeedback = (id) => {
     if (window.confirm('Are you shure you want to delete the Feedback?')) {
-        await fetch(`http://localhost:5000/feedback/${id}`, { method: 'DELETE' })
-
       setFeedback(feedback.filter((item) => item.id !== id))
     }
   }
 
   //Add a new feedback Item
-  const addFeedback = async (newFeedback) => {
-    const response = await fetch('http://localhost:5000/feedback', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-        },
-      body: JSON.stringify(newFeedback)
-    })
-
-    const data = await response.json()
-
-    setFeedback([data, ...feedback])
+  const addFeedback = (newFeedback) => {
+    newFeedback.id = uuidv4()
+    setFeedback([newFeedback, ...feedback])
   }
 
   //Set item to be updated
@@ -57,17 +46,8 @@ export const FeedbackProvider = ({children}) => {
   }
 
   //set button send to update
-  const updateFeedback = async (id, updItem) => {
-    const response = await fetch(`http://localhost:5000/feedback/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(updItem)
-    })
-    const data = await response.json()
-
-    setFeedback(feedback.map((item) => item.id === id ? {...item, ...data} : item))
+  const updateFeedback = (id, upditem) => {
+    setFeedback(feedback.map((item) => item.id === id ? {...item, ...upditem} : item))
   }
 
   return (
